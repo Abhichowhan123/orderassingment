@@ -1,10 +1,14 @@
 const lodash = require('lodash');
 const pool = require('../config/database');
 
+
+var express = require('express');
+var app = express();
+      
+var dateTime = require('node-datetime');
 exports.AddOrder = async (req, res) => {
     try {
-        resp = {};
-   
+        resp = {};   
     const {orderNo, companyId, shipmentDate,  customerNote, total, taxes, quantity,unitPrice, grandTotal,
          tax,  amount, paymentStatus, shipStatus, packedStatus,deliveryStatus,fromQuotation} = req.body;
     // console.log(orderNo);
@@ -15,16 +19,17 @@ exports.AddOrder = async (req, res) => {
      );
      console.log(query2[0]['insertId']);
      const productId =  query2[0]['insertId']
-     const CURRENT_DATE_time = await pool.promise().query(
-        `SELECT NOW() AS today`
-     );
-     const Today  = lodash.map(CURRENT_DATE_time[0],'today' );
-        const orderDate = Today[0]
+     var dt = dateTime.create();
+    var formatted = dt.format('Y-m-d H:M:S');
+    console.log(formatted);
+
+    
+        const orderDate = formatted
     const query = await  pool.promise().query(
-        `INSERT INTO order( orderNo, companyId, orderDate, shipmentDate, customerNote, total, taxes, grandTotal, productId, paymentStatus, packedStatus, shipStatus, deliveryStatus, fromQuotation)
+        `INSERT INTO tblOrder( orderNo, companyId, orderDate, shipmentDate, customerNote, total, taxes, grandTotal, productId, paymentStatus, packedStatus, shipStatus, deliveryStatus, fromQuotation)
         VALUES('${orderNo}','${companyId}','${orderDate}','${shipmentDate}','${customerNote}','${total}','${taxes}','${grandTotal}','${productId}','${paymentStatus}','${packedStatus}','${shipStatus}','${deliveryStatus}','${fromQuotation}')`
     );
-    
+
     resp.success = true;
     resp.message = "OK"; 
     resp.data = query[0]['insertId']; 
